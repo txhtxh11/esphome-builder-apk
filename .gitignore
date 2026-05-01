@@ -1,0 +1,14 @@
+# APK 构建产物
+*.apk
+*.aab
+
+# 临时文件
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
