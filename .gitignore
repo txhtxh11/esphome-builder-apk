@@ -1,14 +1,21 @@
-# APK 构建产物
+# Flutter 构建产物
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
 *.apk
 *.aab
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
 
 # 临时文件
 *.tmp
 *.temp
-*~
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
+~/tmp/

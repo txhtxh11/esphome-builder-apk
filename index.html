@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ESP+HOMEKIT生成 - TXH</title>
 <style>
     /* ---------- 主题变量 (与原版一致) ---------- */
@@ -653,8 +653,8 @@
     let compileUrl = localStorage.getItem('esphome_compile_url') || 'https://esphomeonlinecompiler.com/';
     let flashUrl = localStorage.getItem('esphome_flash_url') || 'https://web.esphome.io/';
     
-    function openCompile() { window.open(compileUrl, '_blank'); }
-    function openFlash() { window.open(flashUrl, '_blank'); }
+    function openCompile() { if (window.Launcher) { window.Launcher.postMessage(compileUrl); return; } window.open(compileUrl, '_blank'); }
+    function openFlash() { if (window.Launcher) { window.Launcher.postMessage(flashUrl); return; } window.open(flashUrl, '_blank'); }
     function editCompile() {
         let newUrl = prompt('请输入在线编译网址:', compileUrl);
         if (newUrl && newUrl.trim()) { compileUrl = newUrl.trim(); localStorage.setItem('esphome_compile_url', compileUrl); alert('编译链接已更新'); }
@@ -668,6 +668,14 @@
     function setTheme(theme) {
         document.body.setAttribute('data-theme', theme === 'auto' ? 'auto' : theme);
         localStorage.setItem('esphome_theme', theme);
+        // 通知 Flutter 更新状态栏
+        let t = theme;
+        if (t === 'auto') {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        if (window.ThemeChanged) {
+            window.ThemeChanged.postMessage(t);
+        }
     }
     function loadTheme() {
         const saved = localStorage.getItem('esphome_theme');
@@ -1123,6 +1131,18 @@
     
     // ========== 修复下载兼容性 - 适配飞牛APP ==========
     function safeDownload(content, filename) {
+        // Flutter WebView: 通过 JavaScript Channel 传给原生侧
+        if (window.Downloader && typeof window.Downloader.postMessage === 'function') {
+            try {
+                window.Downloader.postMessage(JSON.stringify({
+                    content: content,
+                    filename: filename
+                }));
+                return true;
+            } catch (e) {
+                console.warn('Flutter 下载通道失败:', e);
+            }
+        }
         const ua = navigator.userAgent;
         const isFeiNiuWebView = /FN|FeiNiu|飞牛|WebView|wv/i.test(ua) || 
                                 /Android.*AppleWebKit.*Mobile.*Safari/.test(ua);
